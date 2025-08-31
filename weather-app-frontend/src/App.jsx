@@ -71,7 +71,6 @@ function App() {
         headers
       })
       
-      // Check if city is already in searched cities to avoid duplicates
       const cityExists = searchedCities.some(weather => 
         weather.name.toLowerCase() === response.data.name.toLowerCase()
       )
@@ -85,7 +84,7 @@ function App() {
     }
   }
 
-  // Show loading screen while Auth0 is initializing
+
   if (isLoading) {
     return (
       <div className="app">
@@ -97,7 +96,7 @@ function App() {
     )
   }
 
-  // Show auth error if there's an authentication issue
+
   if (authError) {
     return (
       <div className="app">
@@ -115,7 +114,7 @@ function App() {
     )
   }
 
-  // Show login screen if not authenticated
+
   if (!isAuthenticated) {
     return (
       <div className="app">
@@ -138,7 +137,7 @@ function App() {
     )
   }
 
-  // Combine searched cities first, then preloaded weather
+
   const allWeatherData = [...searchedCities, ...preloadedWeather]
 
   const handleReset = () => {

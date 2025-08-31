@@ -6,7 +6,6 @@ function WeatherCard({ weather }) {
   const cityName = weather.name
   const iconCode = weather.weather[0].icon
    
-  // OpenWeatherMap icon URL
   const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`
    
   // Get card color based on temperature

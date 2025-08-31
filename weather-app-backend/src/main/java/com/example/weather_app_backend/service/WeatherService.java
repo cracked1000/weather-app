@@ -24,7 +24,7 @@ public class WeatherService {
     @Value("${openweather.api.key}")
     private String apiKey;
 
-    private List<String> cityNames = new ArrayList<>(); // preload city names
+    private List<String> cityNames = new ArrayList<>();
 
     public WeatherService(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.baseUrl("https://api.openweathermap.org").build();
@@ -43,7 +43,7 @@ public class WeatherService {
         }
     }
 
-    // Fetch weather for a specific city
+
     public Mono<WeatherResponse> getWeather(String city) {
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
@@ -57,7 +57,7 @@ public class WeatherService {
                 .onErrorResume(e -> Mono.empty());
     }
 
-    // Fetch weather for all preloaded cities
+
     public Flux<WeatherResponse> getAllPreloadedWeather() {
         List<Mono<WeatherResponse>> requests = new ArrayList<>();
         for (String city : cityNames) {

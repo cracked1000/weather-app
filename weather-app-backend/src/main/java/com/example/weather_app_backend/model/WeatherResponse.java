@@ -31,7 +31,7 @@ public class WeatherResponse {
         @JsonProperty("description")
         private String description;
 
-        @JsonProperty("icon")   // <-- add this
-        private String icon;    // e.g. "01d"
+        @JsonProperty("icon")
+        private String icon;
     }
 }

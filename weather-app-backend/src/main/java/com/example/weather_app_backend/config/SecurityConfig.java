@@ -25,16 +25,17 @@ public class SecurityConfig {
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-        http
+        return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers("/weather/**").authenticated()
                         .anyExchange().permitAll()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtDecoder(jwtDecoder())));
-
-        return http.build();
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.jwtDecoder(jwtDecoder()))
+                )
+                .build();
     }
 
     @Bean
@@ -43,37 +44,39 @@ public class SecurityConfig {
                 .withJwkSetUri(ISSUER + ".well-known/jwks.json")
                 .build();
 
-        // Validate issuer
-        OAuth2TokenValidator<Jwt> withIssuer = JwtValidators.createDefaultWithIssuer(ISSUER);
+        OAuth2TokenValidator<Jwt> issuerValidator = JwtValidators.createDefaultWithIssuer(ISSUER);
 
-        // Validate audience
-        OAuth2TokenValidator<Jwt> audienceValidator = token -> {
-            if (token.getAudience().contains(AUDIENCE)) {
-                return OAuth2TokenValidatorResult.success();
+        OAuth2TokenValidator<Jwt> audienceValidator = new OAuth2TokenValidator<Jwt>() {
+            @Override
+            public OAuth2TokenValidatorResult validate(Jwt token) {
+                if (token.getAudience().contains(AUDIENCE)) {
+                    return OAuth2TokenValidatorResult.success(); // Token is valid
+                }
+                return OAuth2TokenValidatorResult.failure(
+                        new OAuth2Error("invalid_token", "This token is not for our weather API", null));
             }
-            return OAuth2TokenValidatorResult.failure(
-                    new OAuth2Error("invalid_token", "The required audience is missing", null));
         };
 
-        // Combine validators
-        OAuth2TokenValidator<Jwt> validator = new DelegatingOAuth2TokenValidator<>(withIssuer, audienceValidator);
-        jwtDecoder.setJwtValidator(validator);
-
+        OAuth2TokenValidator<Jwt> combinedValidator = new DelegatingOAuth2TokenValidator<>(
+                issuerValidator,
+                audienceValidator
+        );
+        jwtDecoder.setJwtValidator(combinedValidator);
         return jwtDecoder;
     }
 
-    // Enable CORS for your React frontend
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of("http://localhost:3000"));
-        config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization","Content-Type"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*")); // Allow all headers (more permissive)
         config.setExposedHeaders(List.of("Authorization"));
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
+
         return source;
     }
 }

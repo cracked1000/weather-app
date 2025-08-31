@@ -17,13 +17,13 @@ public class WeatherController {
         this.weatherService = weatherService;
     }
 
-    // Endpoint to get all preloaded cities' weather
+
     @GetMapping("/weather/preloaded")
     public Flux<WeatherResponse> getPreloadedWeather() {
         return weatherService.getAllPreloadedWeather();
     }
 
-    // Endpoint to search a city by name
+
     @GetMapping("/weather")
     public Mono<WeatherResponse> getWeather(@RequestParam String city) {
         return weatherService.getWeather(city);
